@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>CS498 Data Visualzation Final Project</title>
+    <!-- link to main stylesheet -->
+    <!-- <link rel="stylesheet" type="text/css" href="/css/main.css"> -->
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <!-- link to scene1 stylesheet -->
+    <link rel="stylesheet" type="text/css" href="scene2.css">
+    <!-- <link rel="stylesheet" type="text/css" href="/css/scene2.css"> -->
+
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li class="active"><a href="scene2.html">Scene2</a></li>
+            <li><a href="scene3.html">Scene3</a></li>
+            <li><a href="scene4.html">Scene4</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="blurb">
+            <h2>Global Trade Activity Analysis in the 21st Century</h2>
+            <p align="justify">
+                Though the global trade activity shows a phenomenal upward trend, it is reasonable to assume that contributions from different regions may vary greatly. Therefore, a bar chart is plotted to show the trade amount for each continent. The graph indicates
+                that Europe is the most active trading region, contributing $51 trillion dollars between 2000 and 2016. This number is almost ten times as that of the least active continent Africa.
+            </p>
+            <script src="https://d3js.org/d3.v4.min.js"></script>
+            <div style="font-size:14px;font-family: sans-serif"><input type="checkbox">Sort Values</div>
+            <div id="graph"></div>
+            <script>
+                //set the margins
+                var margin = {
+                        top: 20,
+                        right: 20,
+                        bottom: 40,
+                        left: 80
+                    },
+                    width = 960 - margin.left - margin.right,
+                    height = 500 - margin.top - margin.bottom;
+
+                d3.csv("scene2_tradebyregion.csv", function(error, data) {
+                    if (error) throw error;
+
+                    //processing the data
+                    data.forEach(function(d) {
+                        d.region = d.region;
+                        d.trade_amount = parseFloat(d.trade_amount);
+                    });
+
+                    // Set and scale the axis range
+                    var x = d3.scaleBand()
+                        .range([0, width - 100])
+                        .padding(0.4)
+                        .domain(data.map(function(d) {
+                            return d.region;
+                        }));
+
+                    var y = d3.scaleLinear()
+                        .range([height, 40])
+                        .domain([
+                            0,
+                            d3.max(data, function(d) {
+                                return d.trade_amount;
+                            }) * 1.15
+                        ]);
+
+                    var xAxis = d3.axisBottom(x);
+                    var yAxis = d3.axisLeft(y);
+
+                    //define gridlines in x&y axis function   
+                    function make_x_gridlines() {
+                        return d3.axisBottom(x).ticks(5)
+                    }
+
+                    function make_y_gridlines() {
+                        return d3.axisLeft(y)
+                    }
+
+                    //define the svg canvas
+                    var svg = d3.select("#graph").append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+                    //Graph Titles
+                    svg.append("text")
+                        .attr("transform", "translate(100,0)")
+                        .attr("x", 120)
+                        .attr("y", 25)
+                        .attr("font-size", "20px")
+                        .attr("font-family", "sans-serif")
+                        .text("Trade Acitivity by Continents (2000-2016)")
+
+                    //append the x axis
+                    svg.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(xAxis);
+
+                    //append the y axis
+                    svg.append("g")
+                        .attr("class", "y axis")
+                        .call(yAxis.ticks(6).tickFormat(function(d) {
+                            return "$" + parseInt(d / 1000000000000) + "T";
+                        }));
+
+                    //append the Y gridlines
+                    svg.append("g")
+                        .attr("class", "grid")
+                        .call(make_y_gridlines()
+                            .tickSize(-width + 100)
+                            .tickFormat("")
+                        )
+
+
+                    //Add a label to the y axis
+                    svg.append("text")
+                        .attr("x", 0 - height / 2)
+                        .attr("y", -margin.left + 20)
+                        .attr("transform", "rotate(-90)")
+                        //.attr("y", 0 - 65)
+                        //.attr("x", 0 - (height / 2))
+                        .attr("dy", "0.7em")
+                        .style("text-anchor", "middle")
+                        .attr("font-size", "14px")
+                        .attr("font-family", "sans-serif")
+                        .text("Trade Amount in Dollars");
+                    //Add a label to the x axis
+                    // svg.append("text")
+                    //     .attr("transform", "translate(" + (width / 2 - 50) + "," + (height + 40) + ")")
+                    //     .style("text-anchor", "middle")
+                    //     .attr("font-size", "14px")
+                    //     .attr("font-family", "sans-serif")
+                    //     .text("Continent");
+
+
+                    //define tooltip
+                    var tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity',
+                        0);
+
+                    svg.selectAll(".bar")
+                        .data(data)
+                        .enter().append("rect")
+                        .attr("class", "bar")
+                        .attr("x", function(d) {
+                            return x(d.region);
+                        })
+                        .attr("width", x.bandwidth())
+                        .attr("y", function(d) {
+                            return y(d.trade_amount);
+                        })
+                        .attr("height", function(d) {
+                            return height - y(d.trade_amount);
+                        })
+                        .on('mousemove', function(d) {
+                            tooltip
+                                .style('opacity', .8)
+                                .style('left', (d3.event.pageX - 50) + 'px')
+                                .style('top', (d3.event.pageY - 50) + 'px')
+                                .style("display", "inline-block")
+                                .html('Continent: ' + d.region + '<br/>' + "$" + parseFloat(d.trade_amount / 1000000000000).toFixed(3) + " Trillion");
+                        })
+                        .on('mouseout', function(d) {
+                            //tooltip.transition(100).style("display", "none");
+                            tooltip.style("display", "none");
+                        });
+
+
+                    svg.selectAll(".bartext")
+                        .data(data)
+                        .enter().append("text")
+                        .attr("class", "bartext")
+                        .attr("text-anchor", "middle")
+                        .attr("x", function(d) {
+                            return x(d.region) + x.bandwidth() / 2;
+                        })
+                        .attr("y", function(d) {
+                            return y(d.trade_amount) - 5;
+                        })
+                        .text(function(d) {
+                            return "$" + parseInt(d.trade_amount / 1000000000000) + "T";
+                        });
+
+                    d3.select("input").on("change", change);
+
+                    function change() {
+                        var x0 = x.domain(data.sort(this.checked ?
+                                    function(a, b) {
+                                        return b.trade_amount - a.trade_amount;
+                                    } :
+                                    function(a, b) {
+                                        return d3.ascending(a.region, b.region);
+                                    })
+                                .map(function(d) {
+                                    return d.region;
+                                }))
+                            .copy();
+                        svg.selectAll(".bar")
+                            .sort(function(a, b) {
+                                return x0(a.region) - x0(b.region);
+                            });
+
+                        svg.selectAll(".bartext")
+                            .sort(function(a, b) {
+                                return x0(a.region) - x0(b.region);
+                            });
+
+                        var transition = svg.transition().duration(750),
+                            delay = function(d, i) {
+                                return i * 50;
+                            };
+                        transition.selectAll(".bartext")
+                            .delay(delay)
+                            .attr("x", function(d) {
+                                return x0(d.region) + x0.bandwidth() / 2;
+                            });
+
+                        transition.selectAll(".bar")
+                            .delay(delay)
+                            .attr("x", function(d) {
+                                return x0(d.region);
+                            });
+
+                        transition.select(".x.axis") //selects the x-axis
+                            .call(xAxis)
+                            .selectAll("g")
+                            .delay(delay);
+                    }
+                });
+            </script>
+            <p align="justify">
+                By clicking on the below checkbox, the trade amount quantity will be sorted from the largest to the smallest.
+            </p>
+        </div>
+        <!-- /.blurb -->
+    </div>
+
+
+    <!-- https://www.w3schools.com/howto/howto_css_modals.asp -->
+    <button id="myButton" style="font-size: .9em">About the Visualization</button>
+    <!--Modal-->
+    <div id="myModal" class="modal">
+
+        <!--Modal content-->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Narrative Visualization</h3>
+            <p style="font-size: 14px">This visualization project follows an <b>interactive slideshow</b> structure. The navigation bar on top allows users to navigate among four scenes. Each scene shows a different aspect of global trade activities in the 21st century. Users are
+                provided with various forms of interaction (including mouseover tooltip, checkbox and list box) to investigate the detailed information they may be interested in.
+            </p>
+            <h3>Data</h3>
+            <p style="font-size: 14px">The global commodity trade statistics is obtained from <a href="https://www.kaggle.com/unitednations/global-commodity-trade-statistics/data" style="color:steelblue">kaggle kernel</a>.The original dataset was of large size, which makes it difficult
+                to create a d3-based visualization. Thus, a series of steps has been taken to process the data. At the end, only the data entries relating to export and import activities between 2000 and 2016 were chosen, followed by necessary aggregation.
+            </p>
+            <h3>Scenes</h3>
+            <p style="font-size: 14px">There are in total four scenes in this slideshow, including a line graph, two bar charts and one donut pie chart. Each scene is composed of a single chart, presenting certain aspect about the subject. The accompanied text discusses the findings
+                inferred from the graph. A navigation bar is listed on top for easy control. To minimize the distraction, the layout and style through scenes is kept consistent.
+            </p>
+            <h3>Annotations</h3>
+            <p style="font-size: 14px">For all four scenes, tooltip is provided by mouse-over action. By hovering above the nodes, bars and arcs, users could get detailed information. In scene 2 and 4, additional annotations have been shown as the text above each bar or outside
+                of the arc. The color legend in scene 3 indicates the trade flow direction.
+            </p>
+            <h3>Parameters</h3>
+            <p style="font-size: 14px">The navigation bar on top works as the parameter to help users move among four scenes. Additionally, in scene 2, a check box is enabled for sorting; in scene 3, a dropdown list allows user to see the trade amount variations for top trading
+                countries within 16 years.
+            </p>
+            <h3>Trigger</h3>
+            <p style="font-size: 14px">Clicking different tabs on the navigation bar triggers the navigation between scenes. The mouseover/mousemove action works as trigger for tooltips in all four scenes. By clicking checkbox in scene 2 , the users trigger the value sorting action.
+                Choosing a specific year in the dropdown list of scene 3 triggers a data filtering action, by which bar chart height and y axis range can be updated accordingly.
+            </p>
+            <h3>Resource</h3>
+            <ul style="list-style-type:disc;font-size: 14px">
+                <li><a href="http://www.thetextmine.net/d3LineGraph.php" style="color:steelblue">Line Graph with Tooltip</a></li>
+                <li><a href="https://bl.ocks.org/mbostock/3885705" style="color:steelblue">Sortable Bar Chart</a></li>
+                <li><a href="https://bl.ocks.org/LemoNode/d73ef3eb17287b30a87290cce57e2d98" style="color:steelblue">Grouped Bar Chart with Toggle</a></li>
+                <li><a href="https://bl.ocks.org/mbhall88/b2504f8f3e384de4ff2b9dfa60f325e2" style="color:steelblue">Reusable Donut Chart</a></li>
+                <li><a href="http://jmcglone.com/guides/github-pages/" style="color:steelblue">HTML Template</a></li>
+            </ul>
+
+        </div>
+    </div>
+    <script>
+        // Get the modal
+        var modal = document.getElementById('myModal');
+
+        // Get the button that opens the modal
+        var btn = document.getElementById("myButton");
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks the button, open the modal 
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+
+
+    <!-- </ul> -->
+    <!-- </footer> -->
+</body>
+
+</html>
