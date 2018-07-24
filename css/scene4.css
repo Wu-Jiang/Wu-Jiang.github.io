@@ -1,0 +1,73 @@
+/* body {
+    background-color: #F1F3F3;
+} */
+
+polyline {
+    opacity: .3;
+    stroke: black;
+    stroke-width: 2px;
+    fill: none;
+}
+
+.axis {
+    font: 11px sans-serif;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #D4D8DA;
+    stroke-width: 2px;
+    shape-rendering: crispEdges;
+}
+
+div.tooltip {
+    position: absolute;
+    min-width: 100px;
+    height: 30px;
+    background: lightgrey;
+    border: 1px solid lightgrey;
+    padding: 2px;
+    text-align: left;
+    font: 12px sans-serif;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.grid path {
+    stroke: none;
+}
+
+.grid line {
+    stroke: #D4D8DA;
+    stroke-opacity: 0.9;
+    shape-rendering: crispEdges;
+}
+
+.line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 3px;
+}
+
+.dot {
+    fill: steelblue;
+    stroke: #fff;
+}
+
+.overlay {
+    fill: none;
+    pointer-events: all;
+}
+
+.focus circle {
+    fill: #F1F3F3;
+    stroke: steelblue;
+    stroke-width: 5px;
+}
+
+.hover-line {
+    stroke: steelblue;
+    stroke-width: 2px;
+    stroke-dasharray: 3, 3;
+}
