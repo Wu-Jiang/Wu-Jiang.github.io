@@ -1,45 +1,122 @@
 body {
     margin: 60px auto;
-    width: 70%;
+    width: 60%;
     background-color: #F1F3F3;
-
 }
-nav ul, footer ul {
-    font-family:'Helvetica', 'Arial', 'Sans-Serif';
+
+nav ul,
+footer ul {
+    font-family: 'Helvetica', 'Arial', 'Sans-Serif';
     padding: 0px;
     list-style: none;
     font-weight: bold;
 }
-nav ul li, footer ul li {
+
+nav ul li,
+footer ul li {
     display: inline;
     margin-right: 20px;
 }
+
 a {
     text-decoration: none;
-    color: #999;
+    color: rgb(133, 132, 132);
 }
+
 a:hover {
     text-decoration: underline;
 }
+
 h1 {
-    font-size: 3em;
-    font-family:'Helvetica', 'Arial', 'Sans-Serif';
+    font-size: 30px;
+    font-family: 'Helvetica', 'Arial', 'Sans-Serif';
 }
+
+h2 {
+    font-size: 28px;
+    font-family: 'Helvetica', 'Arial', 'Sans-Serif';
+    /* text-align: center; */
+}
+
+h3 {
+    font-size: 20px;
+    font-family: 'Helvetica', 'Arial', 'Sans-Serif';
+}
+
 p {
-    font-size: 1.5em;
+    font-size: 16px;
+    font-family: 'Helvetica', 'Arial', 'Sans-Serif';
     line-height: 1.4em;
     color: #333;
 }
-footer {
-    border-top: 1px solid #d5d5d5;
-    font-size: .8em;
-}
 
-ul.posts { 
-    margin: 20px auto 40px; 
+
+/* footer {
+    border-top: 1px solid #d5d5d5;
+    font-size: .9em;
+} */
+
+ul.posts {
+    margin: 20px auto 40px;
     font-size: 1.5em;
 }
 
 ul.posts li {
     list-style: none;
+}
+
+
+/* The Modal (background) */
+
+.modal {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1;
+    /* Sit on top */
+    left: 0;
+    top: 0%;
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: #F1F3F3;
+    /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Black w/ opacity */
+}
+
+
+/* Modal Content/Box */
+
+.modal-content {
+    background-color: #F1F3F3;
+    font-size: 22px;
+    margin: 15% auto;
+    /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 1050px;
+    font-family: 'Helvetica', 'Arial', 'Sans-Serif';
+    /* Could be more or less, depending on screen size */
+}
+
+
+/* The Close Button */
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
 }
