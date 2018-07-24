@@ -1,31 +1,316 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Global Trade Activity Analysis in 21st Century</title>
-		<!-- link to main stylesheet -->
-		<link rel="stylesheet" type="text/css" href="/css/main.css">
-	</head>
-	<body>
-		<nav>
-    		<ul>
-        		<li class="selected"><a href="/">Home</a></li>
-	        	<li><a href="scene1.html">Overall Global Trade</a></li>
-        		<li><a href="/scene2">Scene2</a></li>
-        		<li><a href="/scene3">Scene3</a></li>
-            <li><a href="/scene3">Scene3</a></li>
-    		</ul>
-		</nav>
-		<div class="container">
-    		<div class="blurb">
-        		<h1>first page, should be about overall global trade</h1>
-				<p>test</p>
-    		</div><!-- /.blurb -->
-		</div><!-- /.container -->
-		<footer>
-    		<ul>
-        		<li><a href="mailto:hankquinlanhub@gmail.com">email</a></li>
-        		<li><a href="https://github.com/Wu-Jiang">github.com/Wu-Jiang</a></li>
-			</ul>
-		</footer>
-	</body>
+
+<head>
+    <title>CS498 Data Visualzation Final Project</title>
+    <!-- link to main stylesheet -->
+    <!-- <link rel="stylesheet" type="text/css" href="/css/main.css"> -->
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <!-- link to scene1 stylesheet -->
+    <!-- <link rel="stylesheet" type="text/css" href="scene1.css"> -->
+    <link rel="stylesheet" type="text/css" href="/css/scene1.css">
+
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li class="selected"><a href="/">Home</a></li>
+            <li><a href="scene2.html">Scene2</a></li>
+            <li><a href="scene3.html">Scene3</a></li>
+            <li><a href="scene4.html">Scene4</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="blurb">
+            <h2>Global Trade Activity Analysis in the 21st Century</h2>
+            <p align="justify">
+                This project will investigate how global trade activity evolved in terms of dollar amount, regions, trading directions and commodity categories in the 21th century. The original data comes from <a href="https://www.kaggle.com/unitednations/global-commodity-trade-statistics/data"
+                    style="color:steelblue">kaggle kernel</a>, but only the data entries relating to export and import activities between 2000 and 2016 were selected. In total, the trade activities involving 195 unique countries and 15 categories/95 subcategories
+                (according to HS 1992 code) of commodities will be discussed in the following analysis.
+            </p>
+            <script src="https://d3js.org/d3.v4.min.js"></script>
+            <svg width="960" height="500"></svg>
+
+            <script>
+                //set the margins
+                var svg = d3.select("svg"),
+
+                    margin = {
+                        top: 20,
+                        right: 20,
+                        bottom: 40,
+                        left: 80
+                    },
+                    width = +svg.attr("width") - margin.left - margin.right,
+                    height = +svg.attr("height") - margin.top - margin.bottom;
+
+
+
+                //data preprocessing
+                var parseTime = d3.timeParse("%Y")
+                var formatTime = d3.timeFormat("%Y")
+                    //bisectDate = d3.bisector(function (d) { return d.year; }).left;
+
+
+                // Set the range
+                var x = d3.scaleTime().range([0, width - 100]);
+                var y = d3.scaleLinear().range([height, 40]);
+
+                // line generator
+                var line = d3.line()
+                    .x(function(d) {
+                        return x(d.year);
+                    })
+                    .y(function(d) {
+                        return y(d.trade_amount);
+                    });
+
+                var g = svg.append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                //define tooltip
+                var div = d3.select('body').append('div').attr('class', 'tooltip').style('opacity',
+                    0);
+
+                //define gridlines in x&y axis function   
+                function make_x_gridlines() {
+                    return d3.axisBottom(x).ticks(5)
+                }
+
+                function make_y_gridlines() {
+                    return d3.axisLeft(y).ticks(5)
+                }
+
+                //Graph Titles
+                g.append("text")
+                    .attr("transform", "translate(100,0)")
+                    .attr("x", 120)
+                    .attr("y", 25)
+                    .attr("font-size", "20px")
+                    .attr("font-family", "sans-serif")
+                    .text("Global Trade Trend (2000-2016)")
+
+
+
+                //define gridlines in y axis function
+
+
+                d3.csv("scene1_globaloveralltrade.csv", function(error, data) {
+                    if (error) throw error;
+
+                    data.forEach(function(d) {
+                        d.year = parseTime(d.year);
+                        d.trade_amount = parseFloat(d.trade_amount);
+                    });
+                    //console.table(data, ["year", "trade_amount"]);
+
+                    //Scale the range of the data
+                    x.domain(d3.extent(data, function(d) {
+                        return d.year;
+                    }));
+                    //x.domain([
+                    //    d3.min(data, function (d) { return d.year; }),
+                    //    d3.max(data, function (d) { return d.year; })])
+                    y.domain([
+                        d3.min(data, function(d) {
+                            return d.trade_amount;
+                        }) / 1.15,
+                        d3.max(data, function(d) {
+                            return d.trade_amount;
+                        }) * 1.15
+                    ]);
+
+                    //append the X gridlines
+                    // g.append("g")
+                    //     .attr("class", "grid")
+                    //     .attr("transform", "translate(0," + height + ")")
+                    //     .call(make_x_gridlines()
+                    //         .tickSize(-height + 40)
+                    //         .tickFormat("")
+                    //     )
+
+
+                    //append the Y gridlines
+                    g.append("g")
+                        .attr("class", "grid")
+                        .call(make_y_gridlines()
+                            .tickSize(-width + 100)
+                            .tickFormat("")
+                        );
+                    //append the x axis
+                    g.append("g")
+                        .attr("class", "axis axis--x")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(d3.axisBottom(x).ticks(17))
+                        .append("text")
+                        .attr("y", height)
+                        .attr("x", 100)
+                        .attr("text-anchor", "end")
+
+
+                    //append the y axis
+                    g.append("g")
+                        .attr("class", "axis axis--y")
+                        .call(d3.axisLeft(y).ticks(6).tickFormat(function(d) {
+                            return "$" + parseInt(d / 1000000000000) + "T";
+                        }));
+                    // .append("text")
+                    // .attr("class", "axis-title")
+                    // .attr("transform", "rotate(-90)")
+                    // .attr("y", 6)
+                    // .attr("x", -40)
+                    // .attr("dy", ".71em")
+                    // .style("text-anchor", "end")
+                    // .attr("fill", "#5D6971")
+                    // .text("Trade Amount in Dollars)");
+
+                    //Add a label to the y axis
+                    g.append("text")
+                        .attr("x", 0 - height / 2)
+                        .attr("y", -margin.left + 20)
+                        .attr("transform", "rotate(-90)")
+                        //.attr("y", 0 - 65)
+                        //.attr("x", 0 - (height / 2))
+                        .attr("dy", "0.7em")
+                        .style("text-anchor", "middle")
+                        .attr("font-size", "14px")
+                        .attr("font-family", "sans-serif")
+                        .text("Trade Amount in Dollars");
+                    //Add a label to the x axis
+                    // g.append("text")
+                    //     .attr("transform", "translate(" + (width / 2 - 50) + "," + (height + 40) + ")")
+                    //     .style("text-anchor", "middle")
+                    //     .attr("font-size", "14px")
+                    //     .attr("font-family", "sans-serif")
+                    //     .text("Year");
+
+
+
+
+                    //append the line
+                    g.append("path")
+                        .datum(data)
+                        .attr("class", "line")
+                        .attr("d", line);
+
+                    //add a dot at each data point to which hover behaviour can be attached
+
+                    g.selectAll('dot')
+                        .data(data)
+                        .enter()
+                        .append('circle')
+                        .attr("class", "dot")
+                        .attr('r', 5)
+                        .attr('cx', function(d) {
+                            return x(d.year);
+                        })
+                        .attr('cy', function(d) {
+                            return y(d.trade_amount);
+                        })
+                        .on('mouseover', function(d) {
+                            div.transition(100).style('opacity', .8);
+                            div.html('Year: ' + formatTime(d.year) + '<br/>' + "$" + parseFloat(d.trade_amount / 1000000000000).toFixed(3) + " Trillion").style('left', (d3.event.pageX) + 'px')
+                                .style('top', (d3.event.pageY) + 'px');
+                        })
+                        .on('mouseout', function(d) {
+                            div.transition(100).style('opacity', 0);
+                        });
+
+
+
+
+
+                });
+            </script>
+            <p align="justify">
+                The tooltip showed by above line graph indicated the trade amount almost triped from 2000 to 2008 and reached nearly 9.25 trillion U.S. dollars. Then, the global trade activities took a hit from financial crisis since 2009. But the recovery only took
+                about two years. In 2013, the global trade peaked at 11.55 trillion dollars and began to drop since then.
+            </p>
+        </div>
+        <!-- /.blurb -->
+    </div>
+    <!-- /.container -->
+    <!-- <footer> -->
+    <!-- <ul> -->
+    <!-- <li><a href="mailto:hankquinlanhub@gmail.com">email</a></li>
+            <li><a>placeholder</a></li>
+            <li><a href="https://github.com/Wu-Jiang">github.com/Wu-Jiang</a></li> -->
+    <!-- <button class="btn btn-primary" data-toggle="modal" data-target="#myModal">About the Visualization</button> -->
+    <!--open modal-->
+
+    <!-- https://www.w3schools.com/howto/howto_css_modals.asp -->
+    <button id="myButton" style="font-size: .9em">About the Visualization</button>
+    <!--Modal-->
+    <div id="myModal" class="modal">
+
+        <!--Modal content-->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Narrative Visualization</h3>
+            <p style="font-size: 14px">This visualization project follows an <b>interactive slideshow</b> structure. The navigation bar on top allows users to navigate among four scenes. Each scene shows a different aspect of global trade activities in the 21st century. Users are
+                provided with various forms of interaction (including mouseover tooltip, checkbox and list box) to investigate the detailed information they may be interested in.
+            </p>
+            <h3>Data</h3>
+            <p style="font-size: 14px">The global commodity trade statistics is obtained from <a href="https://www.kaggle.com/unitednations/global-commodity-trade-statistics/data" style="color:steelblue">kaggle kernel</a>.The original dataset was of large size, which makes it difficult
+                to create a d3-based visualization. Thus, a series of steps has been taken to process the data. At the end, only the data entries relating to export and import activities between 2000 and 2016 were chosen, followed by necessary aggregation.
+            </p>
+            <h3>Scenes</h3>
+            <p style="font-size: 14px">There are in total four scenes in this slideshow, including a line graph, two bar charts and one donut pie chart. Each scene is composed of a single chart, presenting certain aspect about the subject. The accompanied text discusses the findings
+                inferred from the graph. A navigation bar is listed on top for easy control. To minimize the distraction, the layout and style through scenes is kept consistent.
+            </p>
+            <h3>Annotations</h3>
+            <p style="font-size: 14px">For all four scenes, tooltip is provided by mouse-over action. By hovering above the nodes, bars and arcs, users could get detailed information. In scene 2 and 4, additional annotations have been shown as the text above each bar or outside
+                of the arc. The color legend in scene 3 indicates the trade flow direction.
+            </p>
+            <h3>Parameters</h3>
+            <p style="font-size: 14px">The navigation bar on top works as the parameter to help users move among four scenes. Additionally, in scene 2, a check box is enabled for sorting; in scene 3, a dropdown list allows user to see the trade amount variations for top trading
+                countries within 16 years.
+            </p>
+            <h3>Trigger</h3>
+            <p style="font-size: 14px">Clicking different tabs on the navigation bar triggers the navigation between scenes. The mouseover/mousemove action works as trigger for tooltips in all four scenes. By clicking checkbox in scene 2 , the users trigger the value sorting action.
+                Choosing a specific year in the dropdown list of scene 3 triggers a data filtering action, by which bar chart height and y axis range can be updated accordingly.
+            </p>
+            <h3>Resource</h3>
+            <ul style="list-style-type:disc;font-size: 14px">
+                <li><a href="http://www.thetextmine.net/d3LineGraph.php" style="color:steelblue">Line Graph with Tooltip</a></li>
+                <li><a href="https://bl.ocks.org/mbostock/3885705" style="color:steelblue">Sortable Bar Chart</a></li>
+                <li><a href="https://bl.ocks.org/LemoNode/d73ef3eb17287b30a87290cce57e2d98" style="color:steelblue">Grouped Bar Chart with Toggle</a></li>
+                <li><a href="https://bl.ocks.org/mbhall88/b2504f8f3e384de4ff2b9dfa60f325e2" style="color:steelblue">Reusable Donut Chart</a></li>
+            </ul>
+
+        </div>
+    </div>
+    <script>
+        // Get the modal
+        var modal = document.getElementById('myModal');
+
+        // Get the button that opens the modal
+        var btn = document.getElementById("myButton");
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks the button, open the modal 
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+
+
+    <!-- </ul> -->
+    <!-- </footer> -->
+</body>
+
 </html>
